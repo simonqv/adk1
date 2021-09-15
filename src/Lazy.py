@@ -9,6 +9,7 @@ def lazy(search):
 
 
 def main():
+    print("hello")
     lazy("ööö")
 
 
