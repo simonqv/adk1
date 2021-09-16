@@ -14,20 +14,11 @@ class Korpus:
         return
 
 
-# Ta in sökord.
-# Hitta sökord i filen
-# Hitta med det indexet orden som är relevanta
-# plocka ut alla index
-# Läs i fil.
-# Skriv ut
-
-
 def find_line(search_word, index, k):
     hash_code = builder.calc_hash(search_word)
     pointer = k.korp.get(hash_code)
     index.seek(pointer)
     fst_word = index.readline()
-    print(fst_word)
     index_line = fst_word.split()
     return index_line
 
@@ -41,9 +32,10 @@ def search(search_word, index):
         elif word[2] != search_word[2]:
             return ""
 
+
 def print_korpus(indices, word):
     len_print = 10
-    korpus = open('../files/text.txt', 'r')
+    korpus = open('/afs/kth.se/misc/info/kurser/DD2350/adk21/labb1/korpus', 'r', encoding = "latin-1")
     if len(indices) > 25:
         answer = input("More than 25 lines, are you sure you want to proceed? (y/n)").lower()
         if answer == "n" or answer == "no":
@@ -62,10 +54,11 @@ def print_korpus(indices, word):
 
 def main():
     k = Korpus()
-    index = open('../files/index.txt', 'r')
+    index = open('/var/tmp/indexsb.txt', 'r', encoding = "latin-1")
     search_word = sys.argv[1].lower()
-
     index_line = find_line(search_word, index, k)
+
+    print("")
 
     if index_line[0] == search_word:
         print_korpus(index_line[1:], index_line[0])

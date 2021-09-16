@@ -6,9 +6,9 @@ except ImportError:
 
 class Builder:
     # Big file with every index
-    raw_index = open('../files/testing.txt', 'r')
+    raw_index = open('/afs/kth.se/misc/info/kurser/DD2350/adk21/labb1/rawindex.txt', 'r', encoding = "latin-1")
     # Index file, no duplicates
-    index = open('../files/index.txt', 'w+')
+    index = open('/var/tmp/indexsb.txt', 'w+', encoding="latin-1")
     lazy_man_dict = {}
     last_word = ""
     offset = 0
@@ -16,7 +16,7 @@ class Builder:
     def build(self):
         while True:
             # Read one line at a time
-            line = self.raw_index.readline()
+            line = self.raw_index.readlines()
             if not line:
                 break
 
@@ -68,7 +68,6 @@ def calc_hash(word):
 def main():
     b = Builder()
     b.build()
-    print(b.lazy_man_dict)
     with open('data.p', 'wb') as fp:
         pickle.dump(b.lazy_man_dict, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
