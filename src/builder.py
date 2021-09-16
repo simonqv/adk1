@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 try:
     import cPickle as pickle
 except ImportError:
@@ -5,51 +7,45 @@ except ImportError:
 
 
 class Builder:
-    # Big file with every index
-    raw_index = open('/afs/kth.se/misc/info/kurser/DD2350/adk21/labb1/rawindex.txt', 'r', encoding = "latin-1")
-    # Index file, no duplicates
-    index = open('/var/tmp/indexsb.txt', 'w+', encoding="latin-1")
     lazy_man_dict = {}
+    index_dict = defaultdict(list)
     last_word = ""
     offset = 0
+    string_arr = []
 
+    # Building the files. Reading from rawindex, to remove duplicates and lastly writes that to file.
     def build(self):
-        while True:
-            # Read one line at a time
-            line = self.raw_index.readlines()
-            if not line:
-                break
-
-            # Take word and its index
-            words = line.split()
-            self.write_to_file(words)
-            self.lazy_index(words[0])
+        with open('/afs/kth.se/misc/info/kurser/DD2350/adk21/labb1/rawindex.txt', 'r', encoding="latin-1") as raw_index:
+            for line in raw_index:
+                words = line.split()
+                self.read_korpus(words)
+            self.write_to_file()
         return
 
-    def write_to_file(self, words):
+    # Writes the index file without duplicates to tmp folder.
+    def write_to_file(self):
+        with open('/var/tmp/index.txt', 'w+', encoding="latin-1") as index:
+            for key, value in self.index_dict.items():
+                self.lazy_index(key, index.tell())
+                index.write(key + " " + " ".join(value) + "\n")
+        return
+
+    # Simply reads each word and index, if a word exists, append index to its array
+    def read_korpus(self, words):
         word = words[0]
         ind = words[1]
-
-        # Write to index file
-        if self.last_word == "":
-            self.offset = self.index.tell()
-            self.index.write(word)
-        elif word != self.last_word:
-            self.index.write("\n")
-            self.offset = self.index.tell()
-            self.index.write(word)
-        self.index.write(" ")
-        self.index.write(ind)
-        self.last_word = word
+        self.index_dict[word].append(ind)
         return
 
-    def lazy_index(self, word):
+    # Creates the lazymanshashmap (dict) with the index of each aaa, aab, ... entry.
+    def lazy_index(self, word, offset):
         lazy_hash = calc_hash(word)
         if lazy_hash not in self.lazy_man_dict:
-            self.lazy_man_dict[lazy_hash] = self.offset
+            self.lazy_man_dict[lazy_hash] = offset
         return lazy_hash
 
 
+# Calculates the index in the way that was presented during lecture. f(a) * 900 + f(b) * 30 + f(c)
 def calc_hash(word):
     chars = list(word)
     chars = [char.replace('ä', chr(ord('z') + 1)) for char in chars]
@@ -68,7 +64,7 @@ def calc_hash(word):
 def main():
     b = Builder()
     b.build()
-    with open('data.p', 'wb') as fp:
+    with open('lazy.p', 'wb') as fp:
         pickle.dump(b.lazy_man_dict, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
 
